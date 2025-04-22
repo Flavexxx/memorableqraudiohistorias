@@ -1,15 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AudioRecorder from './AudioRecorder';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface Story {
   audioUrl: string;
   audioBlob: Blob;
   name: string;
   relation: string;
+  id: string; // Agregamos un ID único para cada historia
 }
 
 const WordPressEmbed: React.FC = () => {
@@ -20,6 +22,7 @@ const WordPressEmbed: React.FC = () => {
   const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
   // Lista de historias publicadas
   const [stories, setStories] = useState<Story[]>([]);
+  const { toast } = useToast();
 
   // Se llama cuando se graba un audio, pero aún no se publica
   const handleAudioReady = (audioBlob: Blob) => {
@@ -29,17 +32,24 @@ const WordPressEmbed: React.FC = () => {
   // Publica el audio junto con los datos del formulario
   const handlePublish = () => {
     if (!name.trim() || !relation.trim() || !pendingAudio) return;
+    
     const audioUrl = URL.createObjectURL(pendingAudio);
+    const newStory: Story = {
+      audioUrl,
+      audioBlob: pendingAudio,
+      name,
+      relation,
+      id: Date.now().toString(), // Generamos un ID único basado en timestamp
+    };
 
-    setStories([
-      {
-        audioUrl,
-        audioBlob: pendingAudio,
-        name,
-        relation,
-      },
-      ...stories,
-    ]);
+    setStories(prevStories => [newStory, ...prevStories]);
+    
+    // Mostrar toast de confirmación
+    toast({
+      title: "Historia publicada",
+      description: `La historia de ${name} ha sido publicada exitosamente.`,
+    });
+    
     // Limpiar estados
     setPendingAudio(null);
     setName("");
@@ -116,9 +126,9 @@ const WordPressEmbed: React.FC = () => {
           {stories.length === 0 && (
             <p className="text-gray-400 text-center text-sm">No hay historias publicadas aún.</p>
           )}
-          {stories.map((story, idx) => (
+          {stories.map((story) => (
             <div
-              key={story.audioUrl}
+              key={story.id}
               className="border rounded-lg p-4 bg-white shadow-sm"
             >
               <div className="mb-1 flex items-center gap-2">

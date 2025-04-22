@@ -1,53 +1,143 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import AudioRecorder from './AudioRecorder';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
+interface Story {
+  audioUrl: string;
+  audioBlob: Blob;
+  name: string;
+  relation: string;
+}
 
 const WordPressEmbed: React.FC = () => {
-  // Esta función puede adaptarse para integrarse con los endpoints de WordPress
-  const handleAudioPublished = (audioBlob: Blob) => {
-    // En un escenario real, aquí se enviaría el archivo a WordPress
-    // utilizando la API REST de WordPress o un endpoint personalizado
-    
-    // Crear un objeto FormData para enviar el archivo
-    const formData = new FormData();
-    formData.append('audio_file', audioBlob, 'grabacion.webm');
-    
-    // Datos adicionales que podrían necesitarse
-    formData.append('post_id', window.location.search.split('post_id=')[1]?.split('&')[0] || '0');
-    formData.append('action', 'upload_audio_recording');
-    
-    console.log('Listo para enviar a WordPress. En una implementación real, esto se enviaría a un endpoint.');
-    
-    // Ejemplo de código para enviar a WordPress (comentado)
-    /*
-    fetch('/wp-admin/admin-ajax.php', {
-      method: 'POST',
-      body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('¡Audio subido correctamente!');
-      } else {
-        alert('Error al subir el audio: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error al subir:', error);
-      alert('Error de conexión al subir el audio');
-    });
-    */
-    
-    // Para la demo, simplemente mostramos un mensaje
-    alert('¡Audio grabado con éxito! En un entorno real, este archivo se enviaría a WordPress.');
+  // Estados para los campos del formulario
+  const [name, setName] = useState("");
+  const [relation, setRelation] = useState("");
+  // Audio temporal antes de publicar
+  const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
+  // Lista de historias publicadas
+  const [stories, setStories] = useState<Story[]>([]);
+
+  // Se llama cuando se graba un audio, pero aún no se publica
+  const handleAudioReady = (audioBlob: Blob) => {
+    setPendingAudio(audioBlob);
   };
+
+  // Publica el audio junto con los datos del formulario
+  const handlePublish = () => {
+    if (!name.trim() || !relation.trim() || !pendingAudio) return;
+    const audioUrl = URL.createObjectURL(pendingAudio);
+
+    setStories([
+      {
+        audioUrl,
+        audioBlob: pendingAudio,
+        name,
+        relation,
+      },
+      ...stories,
+    ]);
+    // Limpiar estados
+    setPendingAudio(null);
+    setName("");
+    setRelation("");
+  };
+
+  // Descartar audio antes de publicar
+  const handleDiscard = () => {
+    setPendingAudio(null);
+  };
+
+  // Validación: ambos campos y un audio listos
+  const canPublish = name.trim() && relation.trim() && pendingAudio;
 
   return (
     <div className="wordpress-audio-recorder-embed">
-      <AudioRecorder onAudioPublished={handleAudioPublished} />
+      <div className="mb-4 p-4 bg-gray-50 rounded shadow">
+        <div className="mb-2">
+          <Label htmlFor="nombre">Nombre</Label>
+          <Input
+            id="nombre"
+            placeholder="Ejemplo: Ana González"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="mt-1"
+            disabled={!!pendingAudio}
+          />
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="parentezco">Parentezco</Label>
+          <Input
+            id="parentezco"
+            placeholder="Ejemplo: Hija, Amigo, Esposo..."
+            value={relation}
+            onChange={e => setRelation(e.target.value)}
+            className="mt-1"
+            disabled={!!pendingAudio}
+          />
+        </div>
+        {/* Solo muestra el grabador si no hay un audio listo, para forzar llenar los campos antes de grabar */}
+        {!pendingAudio ? (
+          <AudioRecorder
+            onAudioPublished={handleAudioReady}
+            key={`${name}-${relation}`} // reset si cambian los campos
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-green-700 font-medium">Audio listo para publicar</span>
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                onClick={handlePublish}
+                disabled={!canPublish}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Publicar
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleDiscard}
+                className="border-red-300 text-red-500 hover:bg-red-50"
+              >
+                Descartar
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
       
-      <div className="mt-4 text-xs text-gray-400 text-center">
+      {/* Historias publicadas */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-2 text-gray-800 text-center">Historias publicadas</h3>
+        <div className="space-y-4">
+          {stories.length === 0 && (
+            <p className="text-gray-400 text-center text-sm">No hay historias publicadas aún.</p>
+          )}
+          {stories.map((story, idx) => (
+            <div
+              key={story.audioUrl}
+              className="border rounded-lg p-4 bg-white shadow-sm"
+            >
+              <div className="mb-1 flex items-center gap-2">
+                <span className="font-semibold text-gray-700">{story.name}</span>
+                <span className="text-gray-400 text-xs">({story.relation})</span>
+              </div>
+              <audio
+                src={story.audioUrl}
+                controls
+                className="w-full mt-1"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 text-xs text-gray-400 text-center">
         <p>Grabador de audio para WordPress</p>
+        <p>Puedes grabar, revisar y publicar historias en homenaje</p>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AudioRecorder from './AudioRecorder';
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import type { WidgetConfig } from "@/types/WidgetConfig";
 // Por defecto, si no hay config global disponible
 const defaultConfig: WidgetConfig = {
   texts: {
+    mainTitle: "Grabemos juntos su historia", // Título personalizable por defecto
     title: "Grabador de audio para WordPress",
     nameLabel: "Nombre",
     namePlaceholder: "Ejemplo: Ana González",
@@ -127,7 +127,7 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
         border: `1px solid ${styles.borderColor}`,
       }}>
         <div className="mb-4 text-lg font-semibold text-center" style={{ color: styles.primaryColor }}>
-          {texts.title}
+          {texts.mainTitle || texts.title} {/* Prioriza mainTitle, fallback a title */}
         </div>
         <div className="mb-2">
           <Label htmlFor="nombre">{texts.nameLabel}</Label>

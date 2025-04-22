@@ -1,5 +1,6 @@
 
 export interface WidgetTextConfig {
+  mainTitle?: string; // Nuevo campo para el título principal personalizable
   title?: string;
   nameLabel?: string;
   namePlaceholder?: string;

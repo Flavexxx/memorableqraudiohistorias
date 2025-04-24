@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import WordPressEmbed from './components/WordPressEmbed';
 import './index.css';
 
@@ -29,7 +29,8 @@ function initializeWidget() {
       };
       
       // Renderizar el componente React en el contenedor
-      ReactDOM.createRoot(container).render(
+      const root = createRoot(container);
+      root.render(
         <React.StrictMode>
           <WordPressEmbed config={config} />
         </React.StrictMode>
@@ -41,7 +42,8 @@ function initializeWidget() {
 // Detectar si estamos en un entorno de desarrollo o WordPress
 if (document.getElementById('root')) {
   // Modo desarrollo - renderizamos en el div 'root'
-  ReactDOM.createRoot(document.getElementById('root')!).render(
+  const root = createRoot(document.getElementById('root')!);
+  root.render(
     <React.StrictMode>
       <WordPressEmbed />
     </React.StrictMode>

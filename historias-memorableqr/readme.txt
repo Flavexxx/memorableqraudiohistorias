@@ -15,14 +15,14 @@ Historias MemorableQR permite a los familiares grabar y compartir historias en a
 
 = Características =
 * Grabador de audio integrado
-* Interfaz sencilla y amigable
-* Personalización de textos
+* Panel de administración para personalización completa
+* Personalización de textos y estilos
 * Compatible con Elementor y otros constructores de páginas
 
 == Installation ==
 1. Sube el plugin a tu directorio de plugins
 2. Activa el plugin desde el menú de WordPress
-3. Navega a "Historias MQR" en el menú lateral para ver las instrucciones
+3. Navega a "Historias MQR" en el menú lateral para ver las instrucciones y configuración
 4. Usa el shortcode [historias_memorableqr] en cualquier página o entrada
 
 == Usage ==
@@ -31,6 +31,8 @@ El plugin puede usarse con el shortcode básico:
 
 O con parámetros personalizados:
 [historias_memorableqr main_title="Título personalizado" title="Grabador" published_stories_title="Historias"]
+
+Para una personalización completa, visita Historias MQR > Configuración en tu panel de administración.
 
 = Uso en Elementor =
 1. Edita tu página con Elementor
@@ -42,4 +44,6 @@ O con parámetros personalizados:
 = 1.0.0 =
 * Versión inicial del plugin
 * Grabador de audio básico
-* Panel de administración con instrucciones de uso
+* Panel de administración con personalización completa
+* Configuración de textos y estilos
+

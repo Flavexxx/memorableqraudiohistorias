@@ -16,17 +16,35 @@ function initializeWidget() {
       const title = container.getAttribute('data-title') || undefined;
       const publishedStoriesTitle = container.getAttribute('data-published-stories-title') || undefined;
       
-      // Configuración personalizada basada en atributos
-      const config = {
-        texts: {
-          mainTitle,
-          title,
-          publishedStoriesTitle,
-        },
-        styles: {
-          // Estilos por defecto, se pueden personalizar más adelante
-        }
-      };
+      // Configuración personalizada basada en atributos o config global
+      let config = {};
+      
+      // Si hay una configuración global de WordPress (pasada por wp_localize_script)
+      if (window.historiasMemorableQR && window.historiasMemorableQR.config) {
+        config = window.historiasMemorableQR.config;
+      } 
+      // Si hay una configuración directa en el elemento (usada en el shortcode)
+      else if (window.audioRecorderConfig) {
+        config = window.audioRecorderConfig;
+      } 
+      // Configuración básica
+      else {
+        config = {
+          texts: {
+            mainTitle,
+            title,
+            publishedStoriesTitle,
+          },
+          styles: {
+            // Estilos por defecto
+          }
+        };
+      }
+      
+      // Sobreescribir con atributos específicos del contenedor si existen
+      if (mainTitle) config.texts.mainTitle = mainTitle;
+      if (title) config.texts.title = title;
+      if (publishedStoriesTitle) config.texts.publishedStoriesTitle = publishedStoriesTitle;
       
       // Renderizar el componente React en el contenedor
       const root = createRoot(container);

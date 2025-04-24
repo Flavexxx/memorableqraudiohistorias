@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Plugin Name: Historias MemorableQR
@@ -10,11 +9,11 @@
  * License: GPL2
  */
 
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
-}
+// Prevenir el acceso directo al archivo
+defined('ABSPATH') or die('No script kiddies please!');
 
-class HistoriasMemorableQR {
+// Separar la definición de la clase para mayor claridad
+class HistoriasMemorableQRCore {
     private $plugin_options;
     
     public function __construct() {
@@ -404,5 +403,13 @@ class HistoriasMemorableQR {
     }
 }
 
-// Inicializar plugin
-new HistoriasMemorableQR();
+// Inicializar plugin con una función de inicialización
+function historias_memorableqr_init() {
+    // Inicializar el plugin solo si está en el área de administración o en el frontend
+    if (is_admin() || (!is_admin() && !defined('DOING_AJAX'))) {
+        new HistoriasMemorableQRCore();
+    }
+}
+
+// Usar función de inicialización para prevenir problemas de salida
+add_action('plugins_loaded', 'historias_memorableqr_init');

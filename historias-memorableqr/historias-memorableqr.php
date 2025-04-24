@@ -4,7 +4,7 @@
  * Plugin Name: Historias MemorableQR
  * Plugin URI: https://memorableqr.com
  * Description: Plugin para grabar y compartir historias de audio
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: MemorableQR Team
  * Author URI: https://memorableqr.com
  * License: GPL2
@@ -71,8 +71,8 @@ class HistoriasMemorableQR {
 
     public function enqueue_scripts() {
         // Cargar scripts y estilos
-        wp_enqueue_script('historias-memorableqr-js', plugin_dir_url(__FILE__) . 'assets/js/index.js', [], '1.0.0', true);
-        wp_enqueue_style('historias-memorableqr-css', plugin_dir_url(__FILE__) . 'assets/css/index.css', [], '1.0.0');
+        wp_enqueue_script('historias-memorableqr-js', plugin_dir_url(__FILE__) . 'assets/js/index.js', [], '1.1.0', true);
+        wp_enqueue_style('historias-memorableqr-css', plugin_dir_url(__FILE__) . 'assets/css/index.css', [], '1.1.0');
         
         // Pasar configuración al script
         wp_localize_script('historias-memorableqr-js', 'historiasMemorableQR', [
@@ -406,4 +406,3 @@ class HistoriasMemorableQR {
 
 // Inicializar plugin
 new HistoriasMemorableQR();
-

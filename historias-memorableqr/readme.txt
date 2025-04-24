@@ -4,7 +4,7 @@ Contributors: memorableqr-team
 Tags: audio, stories, memories
 Requires at least: 5.0
 Tested up to: 6.3
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,9 +41,13 @@ Para una personalización completa, visita Historias MQR > Configuración en tu 
 4. Guarda y visualiza tu página
 
 == Changelog ==
+= 1.1.0 =
+* Corregido el problema de activación del plugin
+* Mejorada la compatibilidad con Elementor
+* Actualizada la estructura del código
+
 = 1.0.0 =
 * Versión inicial del plugin
 * Grabador de audio básico
 * Panel de administración con personalización completa
 * Configuración de textos y estilos
-

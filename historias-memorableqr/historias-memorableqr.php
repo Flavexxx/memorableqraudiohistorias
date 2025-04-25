@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Plugin Name: Historias MemorableQR
@@ -15,8 +16,14 @@ defined('ABSPATH') or die('No script kiddies please!');
 // Separar la definición de la clase para mayor claridad
 class HistoriasMemorableQRCore {
     private $plugin_options;
+    private $plugin_path;
+    private $plugin_url;
     
     public function __construct() {
+        // Definir rutas del plugin
+        $this->plugin_path = plugin_dir_path(__FILE__);
+        $this->plugin_url = plugin_dir_url(__FILE__);
+        
         // Cargar opciones
         $this->load_options();
         
@@ -69,14 +76,43 @@ class HistoriasMemorableQRCore {
     }
 
     public function enqueue_scripts() {
-        // Cargar scripts y estilos
-        wp_enqueue_script('historias-memorableqr-js', plugin_dir_url(__FILE__) . 'assets/js/index.js', [], '1.1.0', true);
-        wp_enqueue_style('historias-memorableqr-css', plugin_dir_url(__FILE__) . 'assets/css/index.css', [], '1.1.0');
+        // Versión para caché-busting
+        $version = '1.1.1';
+        
+        // Registrar y encolar estilos
+        wp_register_style('historias-memorableqr-css', $this->plugin_url . 'assets/css/index.css', [], $version);
+        wp_enqueue_style('historias-memorableqr-css');
+        
+        // Registrar y encolar scripts (al final del body)
+        wp_register_script('historias-memorableqr-js', $this->plugin_url . 'assets/js/index.js', [], $version, true);
+        wp_enqueue_script('historias-memorableqr-js');
         
         // Pasar configuración al script
         wp_localize_script('historias-memorableqr-js', 'historiasMemorableQR', [
-            'config' => $this->plugin_options
+            'config' => $this->plugin_options,
+            'ajaxurl' => admin_url('admin-ajax.php')
         ]);
+        
+        // Añadir script de inicialización al pie de página
+        add_action('wp_footer', [$this, 'add_init_script']);
+    }
+    
+    /**
+     * Añadir script de inicialización inline para asegurar que se ejecute después de cargar todos los scripts
+     */
+    public function add_init_script() {
+        ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof initializeHistoriasMemorableQR === 'function') {
+                    console.log('Inicializando widgets de HistoriasMemorableQR');
+                    initializeHistoriasMemorableQR();
+                } else {
+                    console.error('La función de inicialización no está disponible');
+                }
+            });
+        </script>
+        <?php
     }
 
     public function render_audio_recorder($atts = []) {
@@ -96,16 +132,20 @@ class HistoriasMemorableQRCore {
         $config['texts']['title'] = $shortcode_texts['title'];
         $config['texts']['publishedStoriesTitle'] = $shortcode_texts['published_stories_title'];
         
+        // Generar un ID único para cada instancia del widget
+        $widget_id = 'historias-memorableqr-widget-' . uniqid();
+        
         // Inicio del buffer de salida
         ob_start();
         ?>
-        <div id="historias-memorableqr-widget" 
+        <div id="<?php echo esc_attr($widget_id); ?>" class="historias-memorableqr-widget"
              data-main-title="<?php echo esc_attr($config['texts']['main_title']); ?>"
              data-title="<?php echo esc_attr($config['texts']['title']); ?>"
              data-published-stories-title="<?php echo esc_attr($config['texts']['publishedStoriesTitle']); ?>">
-            <!-- Contenedor para el widget React -->
-            <script>
-                window.audioRecorderConfig = <?php echo wp_json_encode($config); ?>;
+            <div class="loading-indicator">Cargando grabador de audio...</div>
+            <script type="text/javascript">
+                window.historiasMemorableQRConfig = window.historiasMemorableQRConfig || {};
+                window.historiasMemorableQRConfig['<?php echo esc_js($widget_id); ?>'] = <?php echo wp_json_encode($config); ?>;
             </script>
         </div>
         <?php
@@ -413,3 +453,4 @@ function historias_memorableqr_init() {
 
 // Usar función de inicialización para prevenir problemas de salida
 add_action('plugins_loaded', 'historias_memorableqr_init');
+

@@ -84,4 +84,3 @@ if (document.getElementById('root')) {
   // En WordPress - esperar a que el DOM esté listo
   console.log('Modo WordPress: esperando a que initializeHistoriasMemorableQR sea llamado');
 }
-

@@ -4,7 +4,7 @@
  * Plugin Name: Historias MemorableQR
  * Plugin URI: https://memorableqr.com
  * Description: Plugin para grabar y compartir historias de audio
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: MemorableQR Team
  * Author URI: https://memorableqr.com
  * License: GPL2
@@ -453,4 +453,3 @@ function historias_memorableqr_init() {
 
 // Usar función de inicialización para prevenir problemas de salida
 add_action('plugins_loaded', 'historias_memorableqr_init');
-

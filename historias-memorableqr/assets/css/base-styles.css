@@ -9,6 +9,8 @@
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
   min-height: 200px; /* Altura mínima para evitar saltos de diseño */
+  position: relative; /* Para posicionar mensajes de error */
+  z-index: 1; /* Asegurar que no sea afectado por otros estilos de la página */
 }
 
 /* Estilo para el indicador de carga */
@@ -54,12 +56,15 @@
 
 /* Estilos para mensajes de error */
 .historias-memorableqr-error {
-  color: red;
+  color: #e53e3e;
   padding: 15px;
   border: 1px solid #ffcccc;
   background: #fff5f5;
   border-radius: 4px;
   margin: 10px 0;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Estilos para asegurar que no hay conflictos con otros estilos de WP */
@@ -84,4 +89,14 @@
   border: 1px solid #E5E7EB;
   border-radius: 0.25rem;
   margin-bottom: 0.5rem;
+}
+
+/* Prevenir conflictos de estilo con otros plugins */
+.historias-memorableqr-widget * {
+  box-sizing: border-box;
+}
+
+/* Estilos para aislar nuestros componentes de interferencias */
+.historias-memorableqr-widget .wordpress-audio-recorder-embed {
+  isolation: isolate;
 }

@@ -65,37 +65,50 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
     }
   };
 
+  // Estado para controlar errores
+  const [error, setError] = useState<string | null>(null);
+
   // Log inicial
   debugLog('Componente WordPressEmbed inicializando');
   debugLog('Props recibidos:', props);
 
   // Estado para la configuración
-  const [config, setConfig] = useState<WidgetConfig>(
-    props.config || window.audioRecorderConfig || defaultConfig
-  );
+  const [config, setConfig] = useState<WidgetConfig>(() => {
+    try {
+      return props.config || window.audioRecorderConfig || defaultConfig;
+    } catch (e) {
+      console.error("Error al inicializar la configuración:", e);
+      return defaultConfig;
+    }
+  });
 
   // Estado para rastrear si el componente está montado
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Marcar como montado
-    setIsMounted(true);
-    debugLog('Componente montado');
+    try {
+      // Marcar como montado
+      setIsMounted(true);
+      debugLog('Componente montado');
 
-    // Actualizar configuración si viene en props
-    if (props.config) {
-      debugLog('Actualizando config desde props', props.config);
-      setConfig(props.config);
-    } else if (window.audioRecorderConfig) {
-      debugLog('Actualizando config desde window.audioRecorderConfig', window.audioRecorderConfig);
-      setConfig(window.audioRecorderConfig);
+      // Actualizar configuración si viene en props
+      if (props.config) {
+        debugLog('Actualizando config desde props', props.config);
+        setConfig(props.config);
+      } else if (window.audioRecorderConfig) {
+        debugLog('Actualizando config desde window.audioRecorderConfig', window.audioRecorderConfig);
+        setConfig(window.audioRecorderConfig);
+      }
+      
+      // Cleanup
+      return () => {
+        debugLog('Componente desmontado');
+        setIsMounted(false);
+      };
+    } catch (e) {
+      console.error("Error en useEffect de WordPressEmbed:", e);
+      setError("Error al inicializar el grabador: " + (e instanceof Error ? e.message : String(e)));
     }
-    
-    // Cleanup
-    return () => {
-      debugLog('Componente desmontado');
-      setIsMounted(false);
-    };
   }, [props.config]);
 
   // Asegurar que tenemos textos y estilos
@@ -112,42 +125,56 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
   const { toast } = useToast();
 
   const handleAudioReady = (audioBlob: Blob) => {
-    debugLog('Audio listo recibido');
-    setPendingAudio(audioBlob);
+    try {
+      debugLog('Audio listo recibido');
+      setPendingAudio(audioBlob);
+    } catch (e) {
+      console.error("Error al manejar audio:", e);
+      setError("Error al procesar el audio grabado");
+    }
   };
 
   const handlePublish = () => {
-    if (!name.trim() || !relation.trim() || !pendingAudio) {
-      debugLog('No se puede publicar: faltan datos');
-      return;
+    try {
+      if (!name.trim() || !relation.trim() || !pendingAudio) {
+        debugLog('No se puede publicar: faltan datos');
+        return;
+      }
+
+      debugLog('Publicando historia');
+      const audioUrl = URL.createObjectURL(pendingAudio);
+      const newStory: Story = {
+        audioUrl,
+        audioBlob: pendingAudio,
+        name,
+        relation,
+        id: Date.now().toString(),
+      };
+
+      setStories(prevStories => [newStory, ...prevStories]);
+
+      toast({
+        title: texts.publishedStoriesTitle,
+        description: `La historia de ${name} ha sido publicada exitosamente.`,
+      });
+
+      setPendingAudio(null);
+      setName("");
+      setRelation("");
+      debugLog('Historia publicada exitosamente');
+    } catch (e) {
+      console.error("Error al publicar:", e);
+      setError("Error al publicar la historia: " + (e instanceof Error ? e.message : String(e)));
     }
-
-    debugLog('Publicando historia');
-    const audioUrl = URL.createObjectURL(pendingAudio);
-    const newStory: Story = {
-      audioUrl,
-      audioBlob: pendingAudio,
-      name,
-      relation,
-      id: Date.now().toString(),
-    };
-
-    setStories(prevStories => [newStory, ...prevStories]);
-
-    toast({
-      title: texts.publishedStoriesTitle,
-      description: `La historia de ${name} ha sido publicada exitosamente.`,
-    });
-
-    setPendingAudio(null);
-    setName("");
-    setRelation("");
-    debugLog('Historia publicada exitosamente');
   };
 
   const handleDiscard = () => {
-    debugLog('Audio descartado');
-    setPendingAudio(null);
+    try {
+      debugLog('Audio descartado');
+      setPendingAudio(null);
+    } catch (e) {
+      console.error("Error al descartar audio:", e);
+    }
   };
 
   const canPublish = name.trim() && relation.trim() && pendingAudio;
@@ -164,10 +191,21 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
   };
 
   // Si hay un error, mostrar mensaje
+  if (error) {
+    return (
+      <div className="historias-memorableqr-error">
+        <p><strong>Error al cargar el grabador de audio</strong></p>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  // Si aún no está montado, mostrar cargando
   if (!isMounted) {
     return (
-      <div className="p-4 text-red-500">
-        Cargando componente...
+      <div className="p-4 text-center">
+        <p>Cargando componente...</p>
+        <div className="hmqr-loader"></div>
       </div>
     );
   }

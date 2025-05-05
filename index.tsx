@@ -26,21 +26,35 @@ const debugLog = (message: string, ...args: any[]) => {
   }
 };
 
+// Función segura para crear instancia de root
+const safeCreateRoot = (container: Element): React.Root => {
+  try {
+    // Limpiar el contenedor antes para evitar error #299
+    container.innerHTML = '';
+    return createRoot(container);
+  } catch (error) {
+    console.error("Error al crear root React:", error);
+    // Intentar una vez más después de limpiar
+    container.innerHTML = '';
+    return createRoot(container);
+  }
+};
+
 // Función para inicializar el widget cuando el DOM esté listo
 window.initializeHistoriasMemorableQR = function() {
   debugLog('Buscando contenedores de Historias MemorableQR...');
   
-  // Buscar todos los contenedores del widget por clase
-  const containers = document.querySelectorAll('.historias-memorableqr-widget');
-  debugLog(`Encontrados ${containers.length} contenedores de widgets`);
-  
-  if (containers.length === 0) {
-    console.error('No se encontraron contenedores de widgets con la clase .historias-memorableqr-widget');
-    return;
-  }
-  
-  containers.forEach(container => {
-    if (container) {
+  try {
+    // Buscar todos los contenedores del widget por clase
+    const containers = document.querySelectorAll('.historias-memorableqr-widget');
+    debugLog(`Encontrados ${containers.length} contenedores de widgets`);
+    
+    if (containers.length === 0) {
+      console.warn('No se encontraron contenedores de widgets con la clase .historias-memorableqr-widget');
+      return;
+    }
+    
+    containers.forEach(container => {
       try {
         // Obtener el ID único del contenedor
         const containerId = container.id;
@@ -88,8 +102,8 @@ window.initializeHistoriasMemorableQR = function() {
         container.innerHTML = '';
         
         try {
-          // Renderizar el componente React en el contenedor vacío
-          const root = createRoot(container);
+          // Renderizar el componente React en el contenedor vacío de forma segura
+          const root = safeCreateRoot(container);
           root.render(
             <React.StrictMode>
               <WordPressEmbed config={config} />
@@ -98,7 +112,7 @@ window.initializeHistoriasMemorableQR = function() {
           debugLog(`Widget inicializado correctamente en ${containerId}`);
         } catch (renderError) {
           console.error(`Error al renderizar el componente React:`, renderError);
-          container.innerHTML = `<div style="color: red; padding: 15px; border: 1px solid #ffcccc; background: #fff5f5; border-radius: 4px;">
+          container.innerHTML = `<div class="historias-memorableqr-error">
             <p><strong>Error al renderizar el componente de React</strong></p>
             <p>Detalles: ${renderError.message}</p>
           </div>`;
@@ -106,13 +120,15 @@ window.initializeHistoriasMemorableQR = function() {
       } catch (error) {
         console.error(`Error al inicializar widget:`, error);
         // Mostrar mensaje de error en el contenedor
-        container.innerHTML = '<div style="color: red; padding: 15px; border: 1px solid #ffcccc; background: #fff5f5; border-radius: 4px;">' +
+        container.innerHTML = '<div class="historias-memorableqr-error">' +
           '<p><strong>Error al cargar el grabador de audio</strong></p>' +
           '<p>Detalles: ' + (error instanceof Error ? error.message : String(error)) + '</p>' +
           '</div>';
       }
-    }
-  });
+    });
+  } catch (globalError) {
+    console.error("Error global en la inicialización:", globalError);
+  }
 };
 
 // Detectar si estamos en un entorno de desarrollo o WordPress
@@ -123,13 +139,17 @@ if (document.getElementById('root')) {
   
   // Asegurarse de que el elemento root está vacío
   if (rootElement) {
-    rootElement.innerHTML = '';
-    const root = createRoot(rootElement);
-    root.render(
-      <React.StrictMode>
-        <WordPressEmbed />
-      </React.StrictMode>
-    );
+    try {
+      rootElement.innerHTML = '';
+      const root = createRoot(rootElement);
+      root.render(
+        <React.StrictMode>
+          <WordPressEmbed />
+        </React.StrictMode>
+      );
+    } catch (error) {
+      console.error("Error al renderizar en modo desarrollo:", error);
+    }
   }
 } else {
   // En WordPress, inicialización manual no es necesaria

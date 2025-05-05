@@ -4,7 +4,7 @@
  * Plugin Name: Historias MemorableQR
  * Plugin URI: https://memorableqr.com
  * Description: Plugin para grabar y compartir historias de audio
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: MemorableQR Team
  * Author URI: https://memorableqr.com
  * License: GPL2
@@ -23,7 +23,7 @@ class HistoriasMemorableQRCore {
     
     public function __construct() {
         // Definir versión del plugin (sin timestamp en producción)
-        $this->version = '1.1.3';
+        $this->version = '1.1.4';
         
         // Definir rutas del plugin
         $this->plugin_path = plugin_dir_path(__FILE__);
@@ -122,7 +122,7 @@ class HistoriasMemorableQRCore {
             $this->debug_log("ERROR: CSS principal no encontrado en: " . $css_file);
         }
         
-        // Verificar y registrar scripts
+        // Verificar y registrar scripts con prioridad alta para cargar antes que otros scripts
         $js_path = 'assets/js/index.js';
         $js_file = $this->plugin_path . $js_path;
         $js_url = $this->plugin_url . $js_path;
@@ -130,16 +130,16 @@ class HistoriasMemorableQRCore {
         if (file_exists($js_file)) {
             $this->debug_log("JS principal encontrado: " . $js_file . " URL: " . $js_url);
             
-            // Registrar el script SIN jQuery como dependencia (podría estar causando conflictos)
+            // Registrar el script SIN jQuery como dependencia y con prioridad alta
             wp_register_script(
                 'historias-memorableqr-js', 
                 $js_url, 
-                [], // Quitamos jQuery como dependencia
+                [], // Sin dependencias para evitar conflictos
                 $version, 
                 true // Cargar en el footer
             );
             
-            // Encolar el script
+            // Usar una prioridad baja (número alto) para que se cargue después de otros scripts y evitar conflictos
             wp_enqueue_script('historias-memorableqr-js');
             
             // Pasar configuración al script
@@ -162,70 +162,91 @@ class HistoriasMemorableQRCore {
     public function add_init_script() {
         ?>
         <script>
-        // Función autoejecutada sin depender de jQuery
+        // Función autoejecutada sin depender de jQuery y aislada del entorno global
         (function() {
-            console.log('Script de inicialización de HistoriasMemorableQR cargado');
-            
-            // Función para inicializar el widget con reintentos
-            function initializeWidgetsWithRetry(retries = 5) {
-                console.log('Intentando inicializar widgets de HistoriasMemorableQR... (Intento ' + (6-retries) + ')');
+            // Intenta aislar nuestro código de posibles conflictos
+            try {
+                console.log('Script de inicialización de HistoriasMemorableQR cargado');
                 
-                // Verificar si la función de inicialización está disponible
-                if (typeof window.initializeHistoriasMemorableQR === 'function') {
-                    console.log('Función de inicialización encontrada, ejecutando...');
-                    try {
-                        window.initializeHistoriasMemorableQR();
-                        console.log('Inicialización completada.');
-                    } catch (error) {
-                        console.error('Error durante la inicialización:', error);
-                        if (retries > 0) {
-                            console.log(`Reintentando inicialización en 1 segundo... (${retries} intentos restantes)`);
-                            setTimeout(() => initializeWidgetsWithRetry(retries - 1), 1000);
+                // Función para inicializar el widget con reintentos
+                function initializeWidgetsWithRetry(retries = 5) {
+                    console.log('Intentando inicializar widgets de HistoriasMemorableQR... (Intento ' + (6-retries) + ')');
+                    
+                    // Verificar si la función de inicialización está disponible
+                    if (typeof window.initializeHistoriasMemorableQR === 'function') {
+                        console.log('Función de inicialización encontrada, ejecutando...');
+                        try {
+                            window.initializeHistoriasMemorableQR();
+                            console.log('Inicialización completada.');
+                        } catch (error) {
+                            console.error('Error durante la inicialización:', error);
+                            if (retries > 0) {
+                                console.log(`Reintentando inicialización en 1 segundo... (${retries} intentos restantes)`);
+                                setTimeout(() => initializeWidgetsWithRetry(retries - 1), 1000);
+                            }
                         }
-                    }
-                } else {
-                    console.log('Función de inicialización no disponible todavía.');
-                    if (retries > 0) {
-                        console.log(`Esperando script... Reintentando en 1 segundo (${retries} intentos restantes)`);
-                        setTimeout(() => initializeWidgetsWithRetry(retries - 1), 1000);
                     } else {
-                        console.error('La función de inicialización no se pudo cargar después de varios intentos.');
-                        
-                        // Último intento: buscar contenedores e inicializar manualmente
-                        const containers = document.querySelectorAll('.historias-memorableqr-widget');
-                        if (containers.length > 0) {
-                            console.log('Encontrados contenedores sin inicializar, mostrando mensaje de error...');
-                            containers.forEach(container => {
-                                container.innerHTML = '<div style="color: red; padding: 20px; border: 1px solid #ffcccc; background: #fff5f5; border-radius: 4px;">' +
-                                    '<p><strong>Error al cargar el grabador de audio</strong></p>' +
-                                    '<p>El script de inicialización no pudo cargarse correctamente. Por favor, verifique que:</p>' +
-                                    '<ul style="list-style: disc; margin-left: 20px;">' +
-                                    '<li>Los archivos del plugin están correctamente instalados</li>' +
-                                    '<li>La consola del navegador no muestra errores JavaScript</li>' +
-                                    '<li>No hay conflictos con otros plugins</li>' +
-                                    '</ul>' +
-                                    '<p>Para soporte técnico, contacte a soporte@memorableqr.com</p>' +
-                                '</div>';
-                            });
+                        console.log('Función de inicialización no disponible todavía.');
+                        if (retries > 0) {
+                            console.log(`Esperando script... Reintentando en 1 segundo (${retries} intentos restantes)`);
+                            setTimeout(() => initializeWidgetsWithRetry(retries - 1), 1000);
+                        } else {
+                            console.error('La función de inicialización no se pudo cargar después de varios intentos.');
+                            
+                            // Último intento: buscar contenedores e inicializar manualmente
+                            const containers = document.querySelectorAll('.historias-memorableqr-widget');
+                            if (containers.length > 0) {
+                                console.log('Encontrados contenedores sin inicializar, mostrando mensaje de error...');
+                                containers.forEach(container => {
+                                    container.innerHTML = '<div class="historias-memorableqr-error">' +
+                                        '<p><strong>Error al cargar el grabador de audio</strong></p>' +
+                                        '<p>El script de inicialización no pudo cargarse correctamente. Por favor, verifique que:</p>' +
+                                        '<ul style="list-style: disc; margin-left: 20px;">' +
+                                        '<li>Los archivos del plugin están correctamente instalados</li>' +
+                                        '<li>La consola del navegador no muestra errores JavaScript</li>' +
+                                        '<li>No hay conflictos con otros plugins</li>' +
+                                        '</ul>' +
+                                        '<p>Para soporte técnico, contacte a soporte@memorableqr.com</p>' +
+                                    '</div>';
+                                });
+                            }
                         }
                     }
                 }
+                
+                // Inicializar utilizando una mejor detección del estado de carga
+                function tryInitialize() {
+                    // Si el script principal ya está cargado, inicializar ahora
+                    if (typeof window.initializeHistoriasMemorableQR === 'function') {
+                        setTimeout(initializeWidgetsWithRetry, 200);
+                    } else {
+                        // Esperar a que el script se cargue
+                        setTimeout(function() {
+                            // Verificar contenedores primero
+                            const containers = document.querySelectorAll('.historias-memorableqr-widget');
+                            console.log(`Se encontraron ${containers.length} contenedores de Historias MemorableQR`);
+                            
+                            if (containers.length > 0) {
+                                // Iniciar proceso de inicialización con reintentos
+                                setTimeout(initializeWidgetsWithRetry, 500);
+                            }
+                        }, 500);
+                    }
+                }
+                
+                // Usar diferentes estrategias de inicialización para mayor compatibilidad
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    // La página ya está cargada
+                    tryInitialize();
+                } else {
+                    // Esperar a que la página se cargue
+                    window.addEventListener('DOMContentLoaded', tryInitialize);
+                    // Respaldo por si DOMContentLoaded no se dispara
+                    setTimeout(tryInitialize, 2000);
+                }
+            } catch (globalError) {
+                console.error("Error global en script de inicialización:", globalError);
             }
-            
-            // Inicializar cuando la página se haya cargado completamente
-            if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                // La página ya está cargada
-                setTimeout(initializeWidgetsWithRetry, 500);
-            } else {
-                // Esperar a que la página se cargue
-                window.addEventListener('DOMContentLoaded', function() {
-                    setTimeout(initializeWidgetsWithRetry, 500);
-                });
-            }
-            
-            // Verificar si hay contenedores
-            const containers = document.querySelectorAll('.historias-memorableqr-widget');
-            console.log(`Se encontraron ${containers.length} contenedores de Historias MemorableQR`);
         })();
         </script>
         <?php

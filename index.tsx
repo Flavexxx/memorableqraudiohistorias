@@ -84,11 +84,11 @@ window.initializeHistoriasMemorableQR = function() {
         if (title) config.texts.title = title;
         if (publishedStoriesTitle) config.texts.publishedStoriesTitle = publishedStoriesTitle;
         
-        // Limpiar contenido del contenedor (eliminar mensaje de carga)
+        // IMPORTANTE: Limpiar completamente el contenido del contenedor antes de renderizar
         container.innerHTML = '';
         
         try {
-          // Renderizar el componente React en el contenedor
+          // Renderizar el componente React en el contenedor vacío
           const root = createRoot(container);
           root.render(
             <React.StrictMode>
@@ -119,12 +119,18 @@ window.initializeHistoriasMemorableQR = function() {
 if (document.getElementById('root')) {
   // Modo desarrollo - renderizamos en el div 'root'
   debugLog('Modo desarrollo: renderizando en #root');
-  const root = createRoot(document.getElementById('root')!);
-  root.render(
-    <React.StrictMode>
-      <WordPressEmbed />
-    </React.StrictMode>
-  );
+  const rootElement = document.getElementById('root');
+  
+  // Asegurarse de que el elemento root está vacío
+  if (rootElement) {
+    rootElement.innerHTML = '';
+    const root = createRoot(rootElement);
+    root.render(
+      <React.StrictMode>
+        <WordPressEmbed />
+      </React.StrictMode>
+    );
+  }
 } else {
   // En WordPress, inicialización manual no es necesaria
   // ya que se manejará a través del script inline añadido en el pie de página

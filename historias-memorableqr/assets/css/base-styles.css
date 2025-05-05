@@ -8,6 +8,7 @@
   border-radius: 0.75rem;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
+  min-height: 200px; /* Altura mínima para evitar saltos de diseño */
 }
 
 /* Estilo para el indicador de carga */
@@ -22,7 +23,7 @@
   display: inline-block;
   width: 30px;
   height: 30px;
-  margin-top: 10px;
+  margin: 10px auto;
   border: 3px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
   border-top-color: #2563eb;
@@ -43,4 +44,44 @@
   font-size: 11px;
   color: #666;
   text-align: left;
+  display: none; /* Oculto por defecto, visible solo en modo debug */
+}
+
+/* En modo debug se muestra */
+.historias-memorableqr-widget.debug .hmqr-debug-info {
+  display: block;
+}
+
+/* Estilos para mensajes de error */
+.historias-memorableqr-error {
+  color: red;
+  padding: 15px;
+  border: 1px solid #ffcccc;
+  background: #fff5f5;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+/* Estilos para asegurar que no hay conflictos con otros estilos de WP */
+.historias-memorableqr-widget button {
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.historias-memorableqr-widget input,
+.historias-memorableqr-widget label {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.historias-memorableqr-widget input {
+  padding: 0.5rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
 }

@@ -19,8 +19,12 @@ class HistoriasMemorableQRCore {
     private $plugin_path;
     private $plugin_url;
     private $debug_mode = true; // Activar modo depuración
+    private $version;
     
     public function __construct() {
+        // Definir versión del plugin (sin timestamp en producción)
+        $this->version = '1.1.3';
+        
         // Definir rutas del plugin
         $this->plugin_path = plugin_dir_path(__FILE__);
         $this->plugin_url = plugin_dir_url(__FILE__);
@@ -93,8 +97,8 @@ class HistoriasMemorableQRCore {
     }
 
     public function enqueue_scripts() {
-        // Versión para cache-busting
-        $version = '1.1.3-' . time(); // Añadir timestamp para forzar recarga durante desarrollo
+        // Versión para cache-busting (sin timestamp en producción)
+        $version = $this->version;
         
         // Registrar estilos base (siempre existirán)
         wp_register_style(
@@ -124,15 +128,15 @@ class HistoriasMemorableQRCore {
         $js_url = $this->plugin_url . $js_path;
         
         if (file_exists($js_file)) {
-            $this->debug_log("JS principal encontrado: " . $js_file);
+            $this->debug_log("JS principal encontrado: " . $js_file . " URL: " . $js_url);
             
-            // Registrar el script con jQuery como dependencia para asegurar compatibilidad
+            // Registrar el script SIN jQuery como dependencia (podría estar causando conflictos)
             wp_register_script(
                 'historias-memorableqr-js', 
                 $js_url, 
-                ['jquery'], 
+                [], // Quitamos jQuery como dependencia
                 $version, 
-                true
+                true // Cargar en el footer
             );
             
             // Encolar el script
@@ -158,10 +162,13 @@ class HistoriasMemorableQRCore {
     public function add_init_script() {
         ?>
         <script>
-        (function($) {
+        // Función autoejecutada sin depender de jQuery
+        (function() {
+            console.log('Script de inicialización de HistoriasMemorableQR cargado');
+            
             // Función para inicializar el widget con reintentos
-            function initializeWidgetsWithRetry(retries = 3) {
-                console.log('Intentando inicializar widgets de HistoriasMemorableQR...');
+            function initializeWidgetsWithRetry(retries = 5) {
+                console.log('Intentando inicializar widgets de HistoriasMemorableQR... (Intento ' + (6-retries) + ')');
                 
                 // Verificar si la función de inicialización está disponible
                 if (typeof window.initializeHistoriasMemorableQR === 'function') {
@@ -205,16 +212,21 @@ class HistoriasMemorableQRCore {
                 }
             }
             
-            // Iniciar cuando el DOM esté listo
-            $(document).ready(function() {
-                console.log('DOM listo, esperando 1 segundo antes de inicializar widgets...');
-                setTimeout(initializeWidgetsWithRetry, 1000);
-                
-                // Verificar si hay contenedores
-                const containers = document.querySelectorAll('.historias-memorableqr-widget');
-                console.log(`Se encontraron ${containers.length} contenedores de Historias MemorableQR`);
-            });
-        })(jQuery);
+            // Inicializar cuando la página se haya cargado completamente
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                // La página ya está cargada
+                setTimeout(initializeWidgetsWithRetry, 500);
+            } else {
+                // Esperar a que la página se cargue
+                window.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initializeWidgetsWithRetry, 500);
+                });
+            }
+            
+            // Verificar si hay contenedores
+            const containers = document.querySelectorAll('.historias-memorableqr-widget');
+            console.log(`Se encontraron ${containers.length} contenedores de Historias MemorableQR`);
+        })();
         </script>
         <?php
     }
@@ -259,6 +271,7 @@ class HistoriasMemorableQRCore {
                 <div class="hmqr-debug-info" style="margin-top: 10px; font-size: 12px; color: #666;">
                     <div>ID: <?php echo esc_html($widget_id); ?></div>
                     <div>Plugin URL: <?php echo esc_html($this->plugin_url); ?></div>
+                    <div>Version: <?php echo esc_html($this->version); ?></div>
                 </div>
             </div>
             <script type="text/javascript">

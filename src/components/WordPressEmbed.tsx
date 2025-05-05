@@ -61,6 +61,8 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
     } else if (window.audioRecorderConfig) {
       setConfig(window.audioRecorderConfig);
     }
+    
+    console.log("WordPressEmbed montado con configuración:", config);
   }, [props.config]);
 
   const texts = config.texts || defaultConfig.texts!;
@@ -113,6 +115,9 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
     background: styles.backgroundColor,
     borderColor: styles.borderColor,
     borderRadius: styles.borderRadius,
+    padding: '1rem',
+    maxWidth: '800px',
+    margin: '0 auto',
   };
 
   return (

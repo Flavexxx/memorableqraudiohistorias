@@ -1,0 +1,18 @@
+
+/* Estilos básicos para el contenedor del widget */
+.historias-memorableqr-widget {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #F8FAFC;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Estilo para el indicador de carga */
+.loading-indicator {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}

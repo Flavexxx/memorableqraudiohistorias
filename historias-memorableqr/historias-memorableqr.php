@@ -4,7 +4,7 @@
  * Plugin Name: Historias MemorableQR
  * Plugin URI: https://memorableqr.com
  * Description: Plugin para grabar y compartir historias de audio
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: MemorableQR Team
  * Author URI: https://memorableqr.com
  * License: GPL2
@@ -77,21 +77,31 @@ class HistoriasMemorableQRCore {
 
     public function enqueue_scripts() {
         // Versión para caché-busting
-        $version = '1.1.1';
+        $version = '1.1.2';
         
-        // Registrar y encolar estilos
-        wp_register_style('historias-memorableqr-css', $this->plugin_url . 'assets/css/index.css', [], $version);
-        wp_enqueue_style('historias-memorableqr-css');
+        // Registrar y encolar estilos - ASEGURARNOS QUE LOS ARCHIVOS EXISTEN
+        $css_file = $this->plugin_path . 'assets/css/index.css';
+        if (file_exists($css_file)) {
+            wp_register_style('historias-memorableqr-css', $this->plugin_url . 'assets/css/index.css', [], $version);
+            wp_enqueue_style('historias-memorableqr-css');
+        } else {
+            error_log('HistoriasMemorableQR: CSS file not found at ' . $css_file);
+        }
         
         // Registrar y encolar scripts (al final del body)
-        wp_register_script('historias-memorableqr-js', $this->plugin_url . 'assets/js/index.js', [], $version, true);
-        wp_enqueue_script('historias-memorableqr-js');
-        
-        // Pasar configuración al script
-        wp_localize_script('historias-memorableqr-js', 'historiasMemorableQR', [
-            'config' => $this->plugin_options,
-            'ajaxurl' => admin_url('admin-ajax.php')
-        ]);
+        $js_file = $this->plugin_path . 'assets/js/index.js';
+        if (file_exists($js_file)) {
+            wp_register_script('historias-memorableqr-js', $this->plugin_url . 'assets/js/index.js', [], $version, true);
+            wp_enqueue_script('historias-memorableqr-js');
+            
+            // Pasar configuración al script
+            wp_localize_script('historias-memorableqr-js', 'historiasMemorableQR', [
+                'config' => $this->plugin_options,
+                'ajaxurl' => admin_url('admin-ajax.php')
+            ]);
+        } else {
+            error_log('HistoriasMemorableQR: JS file not found at ' . $js_file);
+        }
         
         // Añadir script de inicialización al pie de página
         add_action('wp_footer', [$this, 'add_init_script']);
@@ -106,9 +116,11 @@ class HistoriasMemorableQRCore {
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof initializeHistoriasMemorableQR === 'function') {
                     console.log('Inicializando widgets de HistoriasMemorableQR');
-                    initializeHistoriasMemorableQR();
+                    setTimeout(function() {
+                        initializeHistoriasMemorableQR();
+                    }, 500); // Retraso ligero para asegurar que todo está cargado
                 } else {
-                    console.error('La función de inicialización no está disponible');
+                    console.error('La función de inicialización no está disponible. Revisa la consola para más detalles.');
                 }
             });
         </script>
@@ -142,10 +154,13 @@ class HistoriasMemorableQRCore {
              data-main-title="<?php echo esc_attr($config['texts']['main_title']); ?>"
              data-title="<?php echo esc_attr($config['texts']['title']); ?>"
              data-published-stories-title="<?php echo esc_attr($config['texts']['publishedStoriesTitle']); ?>">
-            <div class="loading-indicator">Cargando grabador de audio...</div>
+            <div class="loading-indicator">Cargando grabador de audio... 
+                <script>console.log("Widget container found with ID:", "<?php echo esc_js($widget_id); ?>");</script>
+            </div>
             <script type="text/javascript">
                 window.historiasMemorableQRConfig = window.historiasMemorableQRConfig || {};
                 window.historiasMemorableQRConfig['<?php echo esc_js($widget_id); ?>'] = <?php echo wp_json_encode($config); ?>;
+                console.log("Config assigned to ID:", "<?php echo esc_js($widget_id); ?>", window.historiasMemorableQRConfig['<?php echo esc_js($widget_id); ?>']);
             </script>
         </div>
         <?php

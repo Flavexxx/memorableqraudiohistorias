@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import AudioRecorder from './AudioRecorder';
 import { Input } from "@/components/ui/input";
@@ -33,9 +34,14 @@ const defaultConfig: WidgetConfig = {
   }
 };
 
+// Declaración global para el tipo de configuración en window
 declare global {
   interface Window {
     audioRecorderConfig?: WidgetConfig;
+    historiasMemorableQR?: {
+      config?: WidgetConfig;
+      debug?: boolean;
+    };
   }
 }
 
@@ -52,23 +58,53 @@ interface WordPressEmbedProps {
 }
 
 const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
-  // Lee config: props > window > default
-  const [config, setConfig] = useState<WidgetConfig>(props.config || window.audioRecorderConfig || defaultConfig);
+  // Función de log para depuración
+  const debugLog = (message: string, ...args: any[]) => {
+    if (window.historiasMemorableQR?.debug) {
+      console.log(`[WordPressEmbed] ${message}`, ...args);
+    }
+  };
+
+  // Log inicial
+  debugLog('Componente WordPressEmbed inicializando');
+  debugLog('Props recibidos:', props);
+
+  // Estado para la configuración
+  const [config, setConfig] = useState<WidgetConfig>(
+    props.config || window.audioRecorderConfig || defaultConfig
+  );
+
+  // Estado para rastrear si el componente está montado
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // Marcar como montado
+    setIsMounted(true);
+    debugLog('Componente montado');
+
+    // Actualizar configuración si viene en props
     if (props.config) {
+      debugLog('Actualizando config desde props', props.config);
       setConfig(props.config);
     } else if (window.audioRecorderConfig) {
+      debugLog('Actualizando config desde window.audioRecorderConfig', window.audioRecorderConfig);
       setConfig(window.audioRecorderConfig);
     }
     
-    console.log("WordPressEmbed montado con configuración:", config);
+    // Cleanup
+    return () => {
+      debugLog('Componente desmontado');
+      setIsMounted(false);
+    };
   }, [props.config]);
 
+  // Asegurar que tenemos textos y estilos
   const texts = config.texts || defaultConfig.texts!;
   const styles = config.styles || defaultConfig.styles!;
 
-  // Formulario y lógica igual
+  debugLog('Usando configuración:', { texts, styles });
+
+  // Estados del formulario y audio
   const [name, setName] = useState("");
   const [relation, setRelation] = useState("");
   const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
@@ -76,12 +112,17 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
   const { toast } = useToast();
 
   const handleAudioReady = (audioBlob: Blob) => {
+    debugLog('Audio listo recibido');
     setPendingAudio(audioBlob);
   };
 
   const handlePublish = () => {
-    if (!name.trim() || !relation.trim() || !pendingAudio) return;
+    if (!name.trim() || !relation.trim() || !pendingAudio) {
+      debugLog('No se puede publicar: faltan datos');
+      return;
+    }
 
+    debugLog('Publicando historia');
     const audioUrl = URL.createObjectURL(pendingAudio);
     const newStory: Story = {
       audioUrl,
@@ -101,15 +142,17 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
     setPendingAudio(null);
     setName("");
     setRelation("");
+    debugLog('Historia publicada exitosamente');
   };
 
   const handleDiscard = () => {
+    debugLog('Audio descartado');
     setPendingAudio(null);
   };
 
   const canPublish = name.trim() && relation.trim() && pendingAudio;
 
-  // ESTILOS customizables
+  // Estilos customizables
   const wrapperStyles: React.CSSProperties = {
     fontFamily: styles.fontFamily,
     background: styles.backgroundColor,
@@ -120,6 +163,16 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
     margin: '0 auto',
   };
 
+  // Si hay un error, mostrar mensaje
+  if (!isMounted) {
+    return (
+      <div className="p-4 text-red-500">
+        Cargando componente...
+      </div>
+    );
+  }
+
+  debugLog('Renderizando componente');
   return (
     <div
       className="wordpress-audio-recorder-embed"
@@ -161,7 +214,7 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
         {!pendingAudio ? (
           <AudioRecorder
             onAudioPublished={handleAudioReady}
-            key={`${name}-${relation}`}
+            key={`recorder-${name}-${relation}`}
           />
         ) : (
           <div className="flex flex-col items-center gap-2">

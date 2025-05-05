@@ -16,3 +16,31 @@
   padding: 2rem;
   color: #666;
 }
+
+/* Animación de carga */
+.hmqr-loader {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin-top: 10px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #2563eb;
+  animation: hmqr-spin 1s ease-in-out infinite;
+}
+
+@keyframes hmqr-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Información de depuración */
+.hmqr-debug-info {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #666;
+  text-align: left;
+}

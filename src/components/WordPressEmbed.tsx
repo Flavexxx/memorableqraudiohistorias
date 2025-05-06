@@ -10,7 +10,7 @@ import type { WidgetConfig } from "@/types/WidgetConfig";
 // Por defecto, si no hay config global disponible
 const defaultConfig: WidgetConfig = {
   texts: {
-    mainTitle: "Grabemos juntos su historia", // Título personalizable por defecto
+    mainTitle: "Grabemos juntos su historia",
     title: "Grabador de audio para WordPress",
     nameLabel: "Nombre",
     namePlaceholder: "Ejemplo: Ana González",
@@ -26,10 +26,10 @@ const defaultConfig: WidgetConfig = {
   },
   styles: {
     fontFamily: "inherit",
-    backgroundColor: "#F8FAFC", // bg-gray-50
-    primaryColor: "#2563eb", // blue-600
+    backgroundColor: "#F8FAFC",
+    primaryColor: "#2563eb",
     secondaryColor: "#FFFFFF",
-    borderColor: "#E5E7EB", // gray-200
+    borderColor: "#E5E7EB",
     borderRadius: "0.75rem"
   }
 };
@@ -57,8 +57,8 @@ interface WordPressEmbedProps {
   config?: WidgetConfig;
 }
 
-// Función para manejar errores de una manera segura
-const safeExecute = (fn: Function, fallback: any, ...args: any[]): any => {
+// Función para manejar errores y ejecuciones seguras
+const safeExecute = <T,>(fn: (...args: any[]) => T, fallback: T, ...args: any[]): T => {
   try {
     return fn(...args);
   } catch (error) {
@@ -68,7 +68,7 @@ const safeExecute = (fn: Function, fallback: any, ...args: any[]): any => {
 };
 
 const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
-  // Función de log para depuración
+  // Log de depuración
   const debugLog = useCallback((message: string, ...args: any[]) => {
     try {
       if (window.historiasMemorableQR?.debug) {
@@ -81,37 +81,31 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
 
   // Estado para controlar errores
   const [error, setError] = useState<string | null>(null);
-
-  // Log inicial
-  debugLog('Componente WordPressEmbed inicializando');
-  debugLog('Props recibidos:', props);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Estado para la configuración
   const [config, setConfig] = useState<WidgetConfig>(() => {
     return safeExecute(() => {
-      return props.config || window.audioRecorderConfig || defaultConfig;
+      const configSource = props.config || window.audioRecorderConfig || defaultConfig;
+      debugLog('Configuración inicial:', configSource);
+      return configSource;
     }, defaultConfig);
   });
 
-  // Estado para rastrear si el componente está montado
-  const [isMounted, setIsMounted] = useState(false);
-
   useEffect(() => {
     try {
-      // Marcar como montado
       setIsMounted(true);
       debugLog('Componente montado');
 
-      // Actualizar configuración si viene en props
+      // Actualizar configuración si cambia en props
       if (props.config) {
-        debugLog('Actualizando config desde props', props.config);
+        debugLog('Actualizando config desde props');
         setConfig(props.config);
       } else if (window.audioRecorderConfig) {
-        debugLog('Actualizando config desde window.audioRecorderConfig', window.audioRecorderConfig);
+        debugLog('Actualizando config desde window.audioRecorderConfig');
         setConfig(window.audioRecorderConfig);
       }
       
-      // Cleanup
       return () => {
         debugLog('Componente desmontado');
         setIsMounted(false);
@@ -125,8 +119,6 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
   // Asegurar que tenemos textos y estilos
   const texts = config.texts || defaultConfig.texts!;
   const styles = config.styles || defaultConfig.styles!;
-
-  debugLog('Usando configuración:', { texts, styles });
 
   // Estados del formulario y audio
   const [name, setName] = useState("");
@@ -223,7 +215,8 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
     );
   }
 
-  debugLog('Renderizando componente');
+  debugLog('Renderizando componente con config:', config);
+
   return (
     <div
       className="wordpress-audio-recorder-embed"
@@ -232,11 +225,11 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
       <div className="mb-4 p-4" style={{
         background: styles.backgroundColor,
         borderRadius: styles.borderRadius,
-        boxShadow: "0 1px 8px 0 #0001",
+        boxShadow: "0 1px 8px 0 rgba(0, 0, 0, 0.1)",
         border: `1px solid ${styles.borderColor}`,
       }}>
         <div className="mb-4 text-lg font-semibold text-center" style={{ color: styles.primaryColor }}>
-          {texts.mainTitle || texts.title} {/* Prioriza mainTitle, fallback a title */}
+          {texts.mainTitle || texts.title}
         </div>
         <div className="mb-2">
           <Label htmlFor="nombre">{texts.nameLabel}</Label>

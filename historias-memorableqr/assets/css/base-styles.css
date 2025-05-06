@@ -11,6 +11,7 @@
   min-height: 200px; /* Altura mínima para evitar saltos de diseño */
   position: relative; /* Para posicionar mensajes de error */
   z-index: 1; /* Asegurar que no sea afectado por otros estilos de la página */
+  isolation: isolate; /* Aislar el widget del resto de la página */
 }
 
 /* Estilo para el indicador de carga */
@@ -67,7 +68,30 @@
   line-height: 1.5;
 }
 
-/* Estilos para asegurar que no hay conflictos con otros estilos de WP */
+/* Reset de estilos para evitar conflictos con el tema de WordPress */
+.historias-memorableqr-widget * {
+  all: initial; /* Reset completo de estilos */
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* Restablecemos estilos básicos después del reset */
+.historias-memorableqr-widget div,
+.historias-memorableqr-widget p,
+.historias-memorableqr-widget h1,
+.historias-memorableqr-widget h2,
+.historias-memorableqr-widget h3,
+.historias-memorableqr-widget h4,
+.historias-memorableqr-widget span,
+.historias-memorableqr-widget button,
+.historias-memorableqr-widget input,
+.historias-memorableqr-widget label,
+.historias-memorableqr-widget audio {
+  display: block;
+  font-family: Arial, sans-serif; 
+  line-height: normal;
+}
+
 .historias-memorableqr-widget button {
   cursor: pointer;
   border-radius: 0.25rem;
@@ -75,6 +99,8 @@
   font-size: 1rem;
   line-height: 1.5;
   border: 1px solid transparent;
+  background-color: #2563eb;
+  color: white;
 }
 
 .historias-memorableqr-widget input,
@@ -89,16 +115,8 @@
   border: 1px solid #E5E7EB;
   border-radius: 0.25rem;
   margin-bottom: 0.5rem;
-}
-
-/* Prevenir conflictos de estilo con otros plugins */
-.historias-memorableqr-widget * {
-  box-sizing: border-box;
-}
-
-/* Estilos para aislar nuestros componentes de interferencias */
-.historias-memorableqr-widget .wordpress-audio-recorder-embed {
-  isolation: isolate;
+  background-color: white;
+  color: #333;
 }
 
 /* Aislar los elementos de audio para evitar conflictos */
@@ -106,15 +124,4 @@
   display: block;
   width: 100%;
   margin: 8px 0;
-}
-
-/* Prevenir que los estilos de WordPress afecten nuestros botones */
-.historias-memorableqr-widget button.Button {
-  all: unset; /* Resetear todos los estilos */
-  cursor: pointer;
-  border-radius: 0.25rem;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  border: 1px solid transparent;
 }

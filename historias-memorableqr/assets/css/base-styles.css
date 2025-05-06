@@ -14,14 +14,14 @@
 }
 
 /* Estilo para el indicador de carga */
-.loading-indicator {
+.historias-memorableqr-widget .loading-indicator {
   text-align: center;
   padding: 2rem;
   color: #666;
 }
 
 /* Animación de carga */
-.hmqr-loader {
+.historias-memorableqr-widget .hmqr-loader {
   display: inline-block;
   width: 30px;
   height: 30px;
@@ -37,7 +37,7 @@
 }
 
 /* Información de depuración */
-.hmqr-debug-info {
+.historias-memorableqr-widget .hmqr-debug-info {
   margin-top: 15px;
   padding: 10px;
   background-color: #f5f5f5;
@@ -55,7 +55,7 @@
 }
 
 /* Estilos para mensajes de error */
-.historias-memorableqr-error {
+.historias-memorableqr-widget .historias-memorableqr-error {
   color: #e53e3e;
   padding: 15px;
   border: 1px solid #ffcccc;
@@ -99,4 +99,22 @@
 /* Estilos para aislar nuestros componentes de interferencias */
 .historias-memorableqr-widget .wordpress-audio-recorder-embed {
   isolation: isolate;
+}
+
+/* Aislar los elementos de audio para evitar conflictos */
+.historias-memorableqr-widget audio {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
+
+/* Prevenir que los estilos de WordPress afecten nuestros botones */
+.historias-memorableqr-widget button.Button {
+  all: unset; /* Resetear todos los estilos */
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid transparent;
 }

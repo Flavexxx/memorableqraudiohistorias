@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AudioRecorder from './AudioRecorder';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,13 +57,27 @@ interface WordPressEmbedProps {
   config?: WidgetConfig;
 }
 
+// Función para manejar errores de una manera segura
+const safeExecute = (fn: Function, fallback: any, ...args: any[]): any => {
+  try {
+    return fn(...args);
+  } catch (error) {
+    console.error("Error en ejecución segura:", error);
+    return fallback;
+  }
+};
+
 const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
   // Función de log para depuración
-  const debugLog = (message: string, ...args: any[]) => {
-    if (window.historiasMemorableQR?.debug) {
-      console.log(`[WordPressEmbed] ${message}`, ...args);
+  const debugLog = useCallback((message: string, ...args: any[]) => {
+    try {
+      if (window.historiasMemorableQR?.debug) {
+        console.log(`[WordPressEmbed] ${message}`, ...args);
+      }
+    } catch (e) {
+      // Silenciar errores en la función de debug
     }
-  };
+  }, []);
 
   // Estado para controlar errores
   const [error, setError] = useState<string | null>(null);
@@ -74,12 +88,9 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
 
   // Estado para la configuración
   const [config, setConfig] = useState<WidgetConfig>(() => {
-    try {
+    return safeExecute(() => {
       return props.config || window.audioRecorderConfig || defaultConfig;
-    } catch (e) {
-      console.error("Error al inicializar la configuración:", e);
-      return defaultConfig;
-    }
+    }, defaultConfig);
   });
 
   // Estado para rastrear si el componente está montado
@@ -109,7 +120,7 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
       console.error("Error en useEffect de WordPressEmbed:", e);
       setError("Error al inicializar el grabador: " + (e instanceof Error ? e.message : String(e)));
     }
-  }, [props.config]);
+  }, [props.config, debugLog]);
 
   // Asegurar que tenemos textos y estilos
   const texts = config.texts || defaultConfig.texts!;
@@ -124,7 +135,7 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
   const [stories, setStories] = useState<Story[]>([]);
   const { toast } = useToast();
 
-  const handleAudioReady = (audioBlob: Blob) => {
+  const handleAudioReady = useCallback((audioBlob: Blob) => {
     try {
       debugLog('Audio listo recibido');
       setPendingAudio(audioBlob);
@@ -132,9 +143,9 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
       console.error("Error al manejar audio:", e);
       setError("Error al procesar el audio grabado");
     }
-  };
+  }, [debugLog]);
 
-  const handlePublish = () => {
+  const handlePublish = useCallback(() => {
     try {
       if (!name.trim() || !relation.trim() || !pendingAudio) {
         debugLog('No se puede publicar: faltan datos');
@@ -153,10 +164,12 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
 
       setStories(prevStories => [newStory, ...prevStories]);
 
-      toast({
-        title: texts.publishedStoriesTitle,
-        description: `La historia de ${name} ha sido publicada exitosamente.`,
-      });
+      safeExecute(() => {
+        toast({
+          title: texts.publishedStoriesTitle,
+          description: `La historia de ${name} ha sido publicada exitosamente.`,
+        });
+      }, null);
 
       setPendingAudio(null);
       setName("");
@@ -166,16 +179,16 @@ const WordPressEmbed: React.FC<WordPressEmbedProps> = (props) => {
       console.error("Error al publicar:", e);
       setError("Error al publicar la historia: " + (e instanceof Error ? e.message : String(e)));
     }
-  };
+  }, [name, relation, pendingAudio, debugLog, toast, texts.publishedStoriesTitle]);
 
-  const handleDiscard = () => {
+  const handleDiscard = useCallback(() => {
     try {
       debugLog('Audio descartado');
       setPendingAudio(null);
     } catch (e) {
       console.error("Error al descartar audio:", e);
     }
-  };
+  }, [debugLog]);
 
   const canPublish = name.trim() && relation.trim() && pendingAudio;
 

@@ -1,0 +1,240 @@
+
+.hmqr-widget {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #F8FAFC;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.hmqr-form {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #E5E7EB;
+}
+
+.hmqr-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #2563eb;
+}
+
+.hmqr-field {
+  margin-bottom: 1rem;
+}
+
+.hmqr-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.hmqr-field input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  background-color: white;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.hmqr-field input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.hmqr-field input:disabled {
+  background-color: #F3F4F6;
+  color: #6B7280;
+}
+
+.hmqr-recorder {
+  margin-top: 1rem;
+}
+
+.hmqr-recording-controls {
+  text-align: center;
+}
+
+.hmqr-recording-active {
+  text-align: center;
+}
+
+.hmqr-recording-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: #DC2626;
+}
+
+.hmqr-recording-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #DC2626;
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.hmqr-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hmqr-button-record {
+  background-color: #2563eb;
+  color: white;
+}
+
+.hmqr-button-record:hover {
+  background-color: #1d4ed8;
+}
+
+.hmqr-button-stop {
+  background-color: #DC2626;
+  color: white;
+}
+
+.hmqr-button-stop:hover {
+  background-color: #B91C1C;
+}
+
+.hmqr-button-primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.hmqr-button-primary:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.hmqr-button-secondary {
+  background-color: white;
+  color: #DC2626;
+  border: 1px solid #DC2626;
+}
+
+.hmqr-button-secondary:hover {
+  background-color: #FEF2F2;
+}
+
+.hmqr-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hmqr-audio-ready {
+  text-align: center;
+  padding: 1rem;
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 0.375rem;
+  margin-top: 1rem;
+}
+
+.hmqr-audio-ready span {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: #16A34A;
+}
+
+.hmqr-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.hmqr-playback {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #F9FAFB;
+  border-radius: 0.375rem;
+}
+
+.hmqr-audio {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.hmqr-stories {
+  margin-top: 2rem;
+}
+
+.hmqr-stories h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #2563eb;
+}
+
+.hmqr-no-stories {
+  text-align: center;
+  color: #6B7280;
+  font-style: italic;
+  padding: 2rem;
+}
+
+.hmqr-stories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hmqr-story {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.hmqr-story-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.hmqr-story-name {
+  font-weight: 600;
+  color: #111827;
+}
+
+.hmqr-story-relation {
+  color: #6B7280;
+  font-size: 0.875rem;
+}
+
+.hmqr-error {
+  color: #DC2626;
+  padding: 1rem;
+  border: 1px solid #FCA5A5;
+  background: #FEF2F2;
+  border-radius: 0.375rem;
+  margin: 1rem 0;
+  text-align: center;
+}
